@@ -1,7 +1,7 @@
 'use client';
 import styles from './page.module.css';
 
-import { Metronome } from '@/libs/metronome';
+import { Metronome } from '@/lib/metronome';
 import { useEffect, useMemo, useState } from 'react';
 
 const subdivisions: Array<{ name: string; value: number }> = [
