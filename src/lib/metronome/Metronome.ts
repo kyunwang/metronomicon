@@ -1,124 +1,239 @@
-const BEAT_COUNT = 4; // Number of beats per measure
-const MEASURES = 4; // from time signature e.g. 3/4
 const CLICK_DURATION = 0.03;
 
+interface TimeSignature {
+	beats: number;
+	division: number;
+}
+
+interface MetronomeSettings {
+	bpm: number;
+	subdivisions: number;
+	timeSignature: TimeSignature;
+	sound: 'oscillator' | 'sample';
+	shouldAccentSubdivision: boolean;
+	accentPattern: number[];
+}
+
+interface Sound {
+	play(time: number, frequency: number, volume: number): void;
+}
+
+class OscillatorSound implements Sound {
+	private audioContext: AudioContext;
+
+	constructor(audioContext: AudioContext) {
+		this.audioContext = audioContext;
+	}
+
+	play(time: number, frequency: number, volume: number): void {
+		const osc = this.audioContext.createOscillator();
+		const envelope = this.audioContext.createGain();
+
+		envelope.gain.value = volume;
+		envelope.gain.exponentialRampToValueAtTime(volume, time + 0.001);
+		envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.02);
+
+		osc.connect(envelope);
+		envelope.connect(this.audioContext.destination);
+
+		osc.frequency.value = frequency;
+		osc.start(time);
+		osc.stop(time + CLICK_DURATION);
+	}
+}
+
+class SampleSound implements Sound {}
+
+type PlayModeFunction = (
+	beatInMeasure: number,
+	time: number,
+	metronome: Metronome
+) => void;
+
+// Create Play Mode functions
+const createSubdivisionMode =
+	(metronome: Metronome): PlayModeFunction =>
+	(beatInMeasure: number, time: number) => {
+		const shouldAccent =
+			metronome.settings.shouldAccentSubdivision &&
+			beatInMeasure % metronome.settings.subdivisions === 0;
+		const frequency = shouldAccent ? 1000 : 800;
+		const volume =
+			metronome.settings.accentPattern[
+				Math.floor(beatInMeasure / metronome.settings.subdivisions) %
+					metronome.settings.accentPattern.length
+			] / 3;
+		metronome.sound.play(time, frequency, volume);
+	};
+
+const createSimpleMode =
+	(metronome: Metronome): PlayModeFunction =>
+	(beatInMeasure: number, time: number) => {
+		const frequency = beatInMeasure === 0 ? 1000 : 800;
+		const volume =
+			metronome.settings.accentPattern[
+				beatInMeasure % metronome.settings.accentPattern.length
+			] / 3;
+		metronome.sound.play(time, frequency, volume);
+	};
+
 class Metronome {
-	_audioContext: AudioContext | null = null;
-	_bpm = 60; // Beats per minute
-	_beatSpacing = 60.0 / this.bpm;
-	_intervalWorker: Worker | null = null;
-	subdivision = 1;
-	shouldAccentSubdivision = false;
+	public audioContext: AudioContext;
+	public settings: MetronomeSettings;
+	private intervalWorker: Worker | null = null;
+	public sound: Sound;
+	public playMode: PlayModeFunction;
 
-	_intervalLookAhead = 25; // Scheduling call frequency (ms) interval timer
-	_scheduleAheadTime = 0.1; // How far ahead to schedule (seconds)
+	public shouldAccentSubdivision = false;
 
-	nextNoteTime = 0.0;
-	currentBeatInMeasure: number | null = 0; // Current beat in the current bar
+	private intervalLookAhead = 25; // Scheduling call frequency (ms) interval timer
+	private scheduleAheadTime = 0.1; // How far ahead to schedule (seconds)
 
-	_isRunning = false;
+	private nextNoteTime = 0.0;
+	private currentBeatInMeasure = 0; // Current beat in the current bar
 
-	constructor(audioContext: AudioContext, bpm = this.bpm) {
+	private isRunning = false;
+
+	constructor(
+		audioContext: AudioContext,
+		initialSettings: Partial<MetronomeSettings>
+	) {
 		if (audioContext === undefined) {
 			throw new Error('Audio context not provided');
 		}
 
-		this._audioContext = audioContext;
-		this.bpm = bpm;
+		this.audioContext = audioContext;
+		this.settings = {
+			bpm: 60,
+			subdivisions: 1,
+			shouldAccentSubdivision: false,
+			timeSignature: {
+				beats: 4,
+				division: 4,
+			},
+			sound: 'oscillator',
+			accentPattern: [3, 1, 1, 1],
+			...initialSettings,
+		};
+		this.sound = new OscillatorSound(this.audioContext);
+		this.playMode = createSimpleMode(this);
 
-		this._init();
+		this.init();
 	}
 
-	set bpm(bpm: number) {
-		this._bpm = bpm;
-		this._beatSpacing = 60.0 / bpm;
+	public set bpm(bpm: number) {
+		if (bpm <= 0) {
+			throw new Error('BPM cannot be negative or 0');
+		}
+		this.settings.bpm = bpm;
 	}
 
-	get bpm() {
-		return this._bpm;
+	public get bpm(): number {
+		return this.settings.bpm;
 	}
 
-	_setNextBeatTime = () => {
-		this.nextNoteTime += (1 / this.subdivision) * this._beatSpacing;
+	public set soundType(soundType: 'oscillator' | 'sample') {
+		this.settings.sound = soundType;
+		if (soundType === 'oscillator') {
+			this.sound = new OscillatorSound(this.audioContext);
+		}
+	}
 
+	public get soundType() {
+		return this.settings.sound;
+	}
+
+	public updateSettings(newSettings: Partial<MetronomeSettings>) {
+		// Object.assign(this.settings, newSettings);
+		this.settings = { ...this.settings, ...newSettings };
+
+		if (newSettings.sound) {
+			if (newSettings.sound === 'oscillator') {
+				this.sound = new OscillatorSound(this.audioContext);
+			}
+			// TODO: Sample
+		}
+
+		if (newSettings.subdivisions) {
+			this.currentBeatInMeasure = 0;
+		}
+	}
+
+	private setNextBeatTime = () => {
+		this.nextNoteTime +=
+			(1 / this.settings.subdivisions) * (60.0 / this.settings.bpm);
 		this.currentBeatInMeasure++;
-		if (this.currentBeatInMeasure === BEAT_COUNT * this.subdivision) {
+
+		if (
+			this.currentBeatInMeasure ===
+			this.settings.timeSignature.beats * this.settings.subdivisions
+		) {
 			this.currentBeatInMeasure = 0;
 		}
 	};
 
+	public setMode(mode: 'simple' | 'subdivision') {
+		if (mode === 'simple') {
+			this.playMode = createSimpleMode(this);
+		} else {
+			this.playMode = createSubdivisionMode(this);
+		}
+	}
+
 	// Schedule a note to be played at a specific time in the future
 	// Based on audiocontext current time
-	_scheduleBeat = (beatInMeasure: number, time: number) => {
-		const osc = this._audioContext.createOscillator();
-		const envelope = this._audioContext.createGain();
-
-		envelope.gain.value = 1;
-		envelope.gain.exponentialRampToValueAtTime(1, time + 0.001);
-		envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.02);
-
-		osc.connect(envelope);
-		envelope.connect(this._audioContext.destination);
-
-		// if (beatInMeasure % (BEAT_COUNT * SUBDIVISIONS) === 0) {
-		if (this.shouldAccentSubdivision && this.subdivision > 1) {
-			const shouldAccent = beatInMeasure % this.subdivision === 0;
-			osc.frequency.value = shouldAccent ? 1000 : 800;
-		} else {
-			osc.frequency.value = beatInMeasure === 0 ? 1000 : 800;
-		}
-
-		osc.start(time);
-		osc.stop(time + CLICK_DURATION);
+	private scheduleBeat = (beatInMeasure: number, time: number) => {
+		this.playMode(beatInMeasure, time, this);
 	};
 
-	_scheduler = () => {
+	private scheduler = () => {
 		while (
 			this.nextNoteTime <
-			this._audioContext.currentTime + this._scheduleAheadTime
+			this.audioContext.currentTime + this.scheduleAheadTime
 		) {
-			this._scheduleBeat(this.currentBeatInMeasure, this.nextNoteTime);
-			this._setNextBeatTime();
+			this.scheduleBeat(this.currentBeatInMeasure, this.nextNoteTime);
+			this.setNextBeatTime();
 		}
 	};
 
-	_init = () => {
-		this._intervalWorker = new Worker(
+	private init = () => {
+		this.intervalWorker = new Worker(
 			new URL('./workers/intervalWorker.ts', import.meta.url)
 		);
 
-		this._intervalWorker.onmessage = (e) => {
+		this.intervalWorker.onmessage = (e) => {
 			if (e.data === 'tick') {
-				this._scheduler();
+				this.scheduler();
 			} else {
 				console.log(e.data);
 			}
 		};
 
-		this._intervalWorker?.postMessage({
+		this.intervalWorker?.postMessage({
 			command: 'setInterval',
-			interval: this._intervalLookAhead,
+			interval: this.intervalLookAhead,
 		});
 	};
 
-	start = () => {
-		if (this._isRunning) return;
+	public start = () => {
+		if (this.isRunning) return;
 
-		this._isRunning = true;
-		this.nextNoteTime = this._audioContext?.currentTime + 0.05;
+		this.isRunning = true;
+		this.nextNoteTime = this.audioContext?.currentTime + 0.05;
 
-		this._intervalWorker?.postMessage({ command: 'start' });
+		this.intervalWorker?.postMessage({ command: 'start' });
 	};
 
-	stop = () => {
-		this._isRunning = false;
-		this._intervalWorker?.postMessage({ command: 'stop' });
+	public stop = () => {
+		this.isRunning = false;
+		this.currentBeatInMeasure = 0;
+		this.intervalWorker?.postMessage({ command: 'stop' });
 	};
 
-	close = () => {
+	public close = () => {
 		this.stop();
-		this._audioContext?.close();
-		this._intervalWorker?.terminate();
+		this.audioContext?.close();
+		this.intervalWorker?.terminate();
 	};
 }
 

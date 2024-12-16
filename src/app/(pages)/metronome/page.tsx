@@ -1,6 +1,11 @@
 'use client';
+import { Button } from '@/components/ui/button';
 import styles from './page.module.css';
 
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Metronome } from '@/lib/metronome';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -34,8 +39,8 @@ export default function MetronomePage() {
 	}, []);
 
 	useEffect(() => {
-		setBPM(metronome.bpm);
-		setSubdivision(metronome.subdivision);
+		setBPM(metronome.settings.bpm);
+		setSubdivision(metronome.settings.subdivisions);
 		setShouldAccentSubdivision(metronome.shouldAccentSubdivision);
 
 		return () => {
@@ -45,20 +50,21 @@ export default function MetronomePage() {
 
 	const handleBPMChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const newBPM = Number.parseInt(event.target.value);
-		setBPM(newBPM);
 		metronome.bpm = newBPM;
+		setBPM(newBPM);
 	};
 
 	const handleSubdivisionChange = (
-		event: React.ChangeEvent<HTMLInputElement>
+		event: React.ChangeEvent<HTMLButtonElement>
 	) => {
 		const newSubdivision = Number.parseInt(event.target.value);
 		setSubdivision(newSubdivision);
-		metronome.subdivision = newSubdivision;
+		metronome.settings.subdivisions = newSubdivision;
 	};
 
 	const handleSubdivisionAccentChange = () => {
 		metronome.shouldAccentSubdivision = !shouldAccentSubdivision;
+		metronome.setMode(!shouldAccentSubdivision ? 'simple' : 'subdivision');
 		setShouldAccentSubdivision(!shouldAccentSubdivision);
 	};
 
@@ -67,14 +73,11 @@ export default function MetronomePage() {
 			<main className={styles.main}>
 				<div>
 					<p>Metronome</p>
-					<button type="button" onClick={metronome.start}>
-						Start
-					</button>
-					<button type="button" onClick={metronome.stop}>
-						Stop
-					</button>
 
-					<input
+					<Button onClick={metronome.start}>Start</Button>
+					<Button onClick={metronome.stop}>Stop</Button>
+
+					<Input
 						type="number"
 						value={bpm || 0}
 						onChange={handleBPMChange}
@@ -82,30 +85,32 @@ export default function MetronomePage() {
 
 					<br />
 
-					<label>
+					<Label htmlFor="subdivision">
 						Accents Subdivision
-						<input
-							type="checkbox"
+						<Checkbox
+							id="subdivision"
 							checked={shouldAccentSubdivision}
-							onChange={handleSubdivisionAccentChange}
+							onCheckedChange={handleSubdivisionAccentChange}
 						/>
-					</label>
+					</Label>
 
-					<div>
+					<RadioGroup
+						// onChange={handleSubdivisionChange}
+						defaultValue={subdivision}
+					>
 						{subdivisions.map(({ name, value }) => (
-							<label key={name}>
-								<span>{name} </span>
-								<input
-									name="subdivisions"
-									type="radio"
+							<Label key={name} htmlFor={name}>
+								<span>{name}</span>
+								<RadioGroupItem
+									id={name}
 									value={value}
 									checked={value === subdivision}
-									onChange={handleSubdivisionChange}
+									onClick={handleSubdivisionChange}
 								/>
 								<br />
-							</label>
+							</Label>
 						))}
-					</div>
+					</RadioGroup>
 				</div>
 			</main>
 		</div>
