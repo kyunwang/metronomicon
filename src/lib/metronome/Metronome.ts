@@ -104,7 +104,7 @@ class Metronome {
 
 		this.audioContext = audioContext;
 		this.settings = {
-			bpm: 60,
+			bpm: 90,
 			subdivisions: 1,
 			shouldAccentSubdivision: false,
 			timeSignature: {
