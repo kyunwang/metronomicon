@@ -1,0 +1,38 @@
+.bpmBar {
+	position: relative;
+	grid-template-columns: subgrid;
+	grid-column: 1/-1;
+
+	/* height: min-content; */
+	p {
+		margin-bottom: 3px;
+		margin-left: 6px;
+	}
+
+	input {
+		font-size: 96px;
+		text-align: center;
+		width: 100%;
+		font-weight: 700;
+	}
+
+	.lines {
+		position: absolute;
+		width: 100%;
+		border-bottom: 1px solid var(--color-gray-dark);
+		overflow: visible;
+		height: 3px;
+
+		div {
+			position: absolute;
+			height: 6px;
+			width: 1px;
+			background-color: var(--color-gray-dark);
+			bottom: 0;
+
+			&:nth-of-type(2) {
+				right: 0;
+			}
+		}
+	}
+}

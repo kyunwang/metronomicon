@@ -1,3 +1,3 @@
-import Metronome, { type NoteResolution } from './Metronome';
+import Metronome, { type MetronomeSettings } from './Metronome';
 
-export { Metronome, type NoteResolution };
+export { Metronome, type MetronomeSettings };

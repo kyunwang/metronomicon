@@ -5,7 +5,7 @@ interface TimeSignature {
 	division: number;
 }
 
-interface MetronomeSettings {
+export interface MetronomeSettings {
 	bpm: number;
 	subdivisions: number;
 	timeSignature: TimeSignature;
@@ -104,7 +104,7 @@ class Metronome {
 
 		this.audioContext = audioContext;
 		this.settings = {
-			bpm: 60,
+			bpm: 90,
 			subdivisions: 1,
 			shouldAccentSubdivision: false,
 			timeSignature: {
@@ -125,6 +125,9 @@ class Metronome {
 		if (bpm <= 0) {
 			throw new Error('BPM cannot be negative or 0');
 		}
+		// this.stop();
+		// this.nextNoteTime = this.audioContext?.currentTime + 0.05;
+		// this.currentBeatInMeasure = 0;
 		this.settings.bpm = bpm;
 	}
 
@@ -238,3 +241,5 @@ class Metronome {
 }
 
 export default Metronome;
+
+// Warp in a singleton for a shared SharedWorker
