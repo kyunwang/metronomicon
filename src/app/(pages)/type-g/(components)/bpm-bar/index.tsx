@@ -1,5 +1,6 @@
 import { useContext } from 'react';
-import { TypeGContext } from '../button/TypeGProvider';
+import Bracket from '../bracket';
+import { TypeGContext } from '../TypeGProvider';
 import s from './bpm-bar.module.css';
 
 const BPMBar = () => {
@@ -15,11 +16,10 @@ const BPMBar = () => {
 	return (
 		<div className={s.bpmBar}>
 			<input type="number" value={bpm} onChange={handleInputBPMChange} />
+
 			<p>BPM - {bpm}</p>
-			<div className={s.lines}>
-				<div />
-				<div />
-			</div>
+
+			<Bracket />
 		</div>
 	);
 };

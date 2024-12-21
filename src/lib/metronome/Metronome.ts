@@ -86,7 +86,7 @@ class Metronome {
 
 	public shouldAccentSubdivision = false;
 
-	private intervalLookAhead = 25; // Scheduling call frequency (ms) interval timer
+	private intervalLookAhead = 25; // Scheduling call frequency (ms) interval timer. Theoretically enabling 2400bpm
 	private scheduleAheadTime = 0.1; // How far ahead to schedule (seconds)
 
 	private nextNoteTime = 0.0;

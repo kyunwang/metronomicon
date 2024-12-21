@@ -1,9 +1,11 @@
 import { useContext } from 'react';
+import Bracket from '../bracket';
 import Button from '../button';
-import { TypeGContext } from '../button/TypeGProvider';
-import s from './controls-board.module.css';
+import Radial from '../radial';
+import { TypeGContext } from '../TypeGProvider';
+import s from './controls-panel.module.css';
 
-const ControlsBoard = () => {
+const ControlsPanel = () => {
 	const { metronome, setBPM, isPlaying, setIsPlaying } =
 		useContext(TypeGContext);
 
@@ -18,13 +20,26 @@ const ControlsBoard = () => {
 	};
 
 	return (
-		<div className={s.controlBoard}>
-			<div className={s.tbd}>TBD</div>
+		<div className={s.controlPanel}>
+			<div className={s.bracket}>
+				<Bracket />
+			</div>
+			<div className={s.tbd}>
+				<Button className={s.slot} variant="outline" size="sm">
+					TBD
+				</Button>
+				<Button className={s.slot} variant="outline" size="sm">
+					TBD
+				</Button>
+				<Button className={s.slot} variant="outline" size="sm">
+					TBD
+				</Button>
+			</div>
 
 			<div className={s.ctas}>
 				<Button
 					variant="outline"
-					size="sm_wd"
+					size="sm"
 					onClick={() => handleClickBPMChange('add')}
 				>
 					ADD
@@ -32,18 +47,16 @@ const ControlsBoard = () => {
 				</Button>
 				<Button
 					variant="outline"
-					size="sm_wd"
+					size="sm"
 					onClick={() => handleClickBPMChange('subtract')}
 				>
 					SUBTRACT
 					<br />-
 				</Button>
 
-				<Button
-					// variant={isPlaying ? 'default' : 'outline'}
-					size="lg"
-					onClick={handleChangePlayState}
-				>
+				<Radial />
+
+				<Button onClick={handleChangePlayState}>
 					<span>{isPlaying ? 'Stop' : 'Start'}</span>
 				</Button>
 			</div>
@@ -51,6 +64,4 @@ const ControlsBoard = () => {
 	);
 };
 
-ControlsBoard.displayName = 'ControlsBoard';
-
-export default ControlsBoard;
+export default ControlsPanel;

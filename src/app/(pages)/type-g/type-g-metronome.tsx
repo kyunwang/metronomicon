@@ -1,9 +1,7 @@
-'use client';
 import s from './page.module.css';
 
-// import { Button } from '@/components/ui/button';
 import BPMBar from './(components)/bpm-bar';
-import ControlsBoard from './(components)/controls-board';
+import ControlsBoard from './(components)/controls-panel';
 import Footer from './(components)/footer';
 import Header from './(components)/header';
 

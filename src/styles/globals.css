@@ -1,8 +1,8 @@
 @import "./_reset.css";
-@import "./tokens/_colors.css";
-@import "./tokens/_typography.css";
-@import "./tokens/_spacing.css";
-@import "./tokens/_radii.css";
+@import "./_colors.css";
+@import "./_typography.css";
+@import "./_spacing.css";
+@import "./_radii.css";
 
 body {
   overscroll-behavior: none;
