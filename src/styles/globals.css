@@ -1,17 +1,27 @@
 @import "./_reset.css";
+@import "./tokens/_colors.css";
+@import "./tokens/_typography.css";
+@import "./tokens/_spacing.css";
+@import "./tokens/_radii.css";
 
 body {
-  min-height: 100vh;
   overscroll-behavior: none;
   display: flex;
   flex-direction: column;
+
+  min-height: 100vh;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 *::selection {
-  background-color: var(--color-secondary);
   color: var(--color-primary);
+  background-color: var(--color-secondary);
+}
+
+button {
+  cursor: pointer;
 }
 
 @media (prefers-color-scheme: dark) {

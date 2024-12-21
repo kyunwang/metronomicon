@@ -1,6 +1,6 @@
 'use client';
 
-import TypeGProvider from './(components)/button/TypeGProvider';
+import TypeGProvider from './(components)/TypeGProvider';
 import TypeGMetronome from './type-g-metronome';
 
 const TypeGPage = () => {

@@ -1,70 +1,40 @@
-/* Move some to :root once defined */
 .page {
-  font-size: 16px;
-  /* 1rem = 16px */
-
-  /* === Typography === */
-  --font-size-base: 1rem;
-  --font-size-sm: 0.875rem;
-  --font-size-lg: 1.25rem;
-
-  /* === Spacing === */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-
-  /* === Border Radius === */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 1rem;
-
-  /* === Colors === */
-  --color-primary: hsl(17, 96%, 55%, 100%);
-  --color-secondary: hsl(42, 17%, 88%, 100%);
-  --color-gray-dark: hsl(330, 2%, 20%, 100%);
-  --color-gray: hsl(12, 2%, 41%, 100%);
-  --color-gray-light: hsl(0, 0%, 80%, 100%);
-  --color-white: hsl(100, 100%, 100%, 100%);
-
-
-
-
-  background: var(--color-gray-light);
-  color: var(--color-gray-dark);
-  /* background: var(--color-primary); */
-  /* background: hsl(0, 0, 80, 100%); */
-  /* --col-auto: */
-  --col-inside: 1/-1;
-
-  font-family: var(--font-mono);
-
-  flex-grow: 1;
   position: relative;
+
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
 
+  /* Limit width while working on responsiveness */
+  max-width: 480px;
+  margin: auto;
+
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--color-gray-dark);
+
+  background: var(--color-gray-light);
 }
 
 .main {
-  flex: 1;
   display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-rows: min-content 1fr;
-  width: calc(100% - 2 * var(--spacing-sm));
+  flex: 1;
+  gap: var(--spacing-lg) var(--spacing-sm);
+
+  width: calc(100% - 2 * var(--spacing-md));
   margin-inline: auto;
 }
 
 .title {
-  /* height: 200px; */
-  margin-top: 28px;
+  margin: var(--spacing-5xl) var(--spacing-md) 0;
+  font-size: var(--font-size-lg);
 }
 
 .beats {
-  height: 200px;
   grid-column: 1/-1;
+  height: 200px;
+  color: white;
   background-color: var(--color-gray-dark);
-  color: var(--color-white);
 }
