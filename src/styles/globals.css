@@ -1,0 +1,31 @@
+@import "./_reset.css";
+@import "./_colors.css";
+@import "./_typography.css";
+@import "./_spacing.css";
+@import "./_radii.css";
+
+body {
+  overscroll-behavior: none;
+  display: flex;
+  flex-direction: column;
+
+  min-height: 100vh;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*::selection {
+  color: var(--color-primary);
+  background-color: var(--color-secondary);
+}
+
+button {
+  cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}

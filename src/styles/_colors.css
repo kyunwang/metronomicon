@@ -1,0 +1,8 @@
+/* NOTE: Determine Type-g specific colors and global colors */
+:root {
+	--color-primary: hsl(17deg 96% 55%);
+	--color-secondary: hsl(42deg 17% 88%);
+	--color-gray-dark: hsl(330deg 2% 20%);
+	--color-gray: hsl(12deg 2% 41%);
+	--color-gray-light: hsl(0deg 0% 80%);
+}
